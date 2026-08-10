@@ -56,8 +56,4 @@ function trackParcel(){
  let a=document.getElementById("track").value.trim().toUpperCase(), p=data()[a], o=document.getElementById("out");
  if(!p){o.innerHTML="<div class='result'>No shipment found for <b>"+a+"</b>.</div>";return}
  let all=["Booked","In Transit","Out for Delivery","Delivered"],i=all.indexOf(p.status);
- o.innerHTML="<div class='result'><b>AWB:</b> "+p.awb+"<br><b>From:</b> "+(p.from||"-")+" → <b>To:</b> "+(p.to||"-")+"<br><b>Receiver:</b> "+(p.receiver||"-")+"<br><b>Status:</b> "+p.status+"<br><small>Last updated: "+p.updated+"</small><div class='steps'>"+all.map((x,j)=>"<span class='step "+(j<=i?"active":"")+"'>"+x+"</span>").join("")+"</div></div>";
-}
-</script>
-</body>
-</html>
+ o.innerHTML="<div class='result'><b>AWB:</b> "+p.awb+"<br><b>From:</b> "+(p.from||"-")+" → <b>To:</b> "+(p.to||"-")+"<br><b>Receiver:</b> "+(p.receiver||"-")+"<br><b>Status:</b> "+p.status+"<br><small>Last updated: "+p.updated+"</small><div class='steps'>"+all.map((x,j)=>"<span class='step "+(j<=i?"active":"")+"'>"+x
