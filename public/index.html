@@ -4,56 +4,168 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SWETA COURIER — Tracking</title>
+
 <style>
-body{font-family:Arial,sans-serif;background:#f3f6f7;margin:0;color:#15202b}
-header{background:#123b56;color:white;padding:22px;text-align:center}
-h1{margin:0;font-size:26px}.tag{color:#8bd3a8}
-.wrap{max-width:720px;margin:28px auto;padding:16px}
-.card{background:white;border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 4px 18px #0001}
-input,select,button{width:100%;box-sizing:border-box;padding:13px;margin:7px 0;border-radius:9px;border:1px solid #ccd5da;font-size:15px}
-button{background:#123b56;color:white;border:0;font-weight:bold;cursor:pointer}
-.result{border-left:5px solid #2b9b63;padding:14px;background:#f7faf8;border-radius:8px;margin-top:14px}
-.steps{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}.step{padding:8px 10px;border-radius:20px;background:#e7ecef;font-size:13px}.active{background:#2b9b63;color:white}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f3f6f9;
+  color:#17202a;
+}
+header{
+  background:#123b56;
+  color:white;
+  padding:28px 18px;
+  text-align:center;
+}
+h1{margin:0;font-size:26px}
+.tag{color:#8bd3ff}
+.wrap{
+  max-width:720px;
+  margin:28px auto;
+  padding:0 15px;
+}
+.card{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+label{
+  display:block;
+  font-weight:bold;
+  margin:12px 0 6px;
+}
+input,select,button{
+  width:100%;
+  padding:13px;
+  border-radius:10px;
+  border:1px solid #ccd5dc;
+  font-size:16px;
+}
+button{
+  background:#123b56;
+  color:white;
+  border:0;
+  font-weight:bold;
+  margin-top:16px;
+}
+button:active{transform:scale(.98)}
+.result{
+  border-left:5px solid #2b9b63;
+  padding:14px;
+  background:#f7faf8;
+  margin-top:18px;
+  border-radius:8px;
+}
+.steps{
+  display:flex;
+  gap:6px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+.step{
+  padding:8px 10px;
+  border-radius:20px;
+  background:#e7edf2;
+  font-size:13px;
+}
+.active{
+  background:#2b9b63;
+  color:white;
+}
 small{color:#667}
+hr{
+  border:0;
+  border-top:1px solid #ddd;
+  margin:20px 0;
+}
 </style>
 </head>
+
 <body>
-<header><h1>SWETA <span class="tag">COURIER</span></h1><div>SAFE • SPEEDY • RELIABLE</div></header>
+
+<header>
+  <h1>SWETA <span class="tag">COURIER</span></h1>
+  <div>Fast • Safe • Reliable</div>
+</header>
+
 <div class="wrap">
-<div class="card">
-<h2>Track Your Shipment</h2>
-<input id="track" placeholder="Enter AWB / Consignment No. e.g. SWC-2026-000001">
-<button onclick="trackParcel()">Track Parcel</button>
-<div id="out"></div>
+
+  <div class="card">
+    <h2>Track Your Parcel</h2>
+
+    <label>AWB / Tracking Number</label>
+    <input id="track" placeholder="Enter AWB number">
+
+    <button onclick="trackParcel()">Track Parcel</button>
+
+    <div id="trackResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Book a Parcel</h2>
+
+    <label>AWB Number</label>
+    <input id="awb" placeholder="Enter AWB number">
+
+    <label>Sender Name</label>
+    <input id="sender" placeholder="Sender name">
+
+    <label>Receiver Name</label>
+    <input id="receiver" placeholder="Receiver name">
+
+    <label>Current Status</label>
+    <select id="status">
+      <option>Booked</option>
+      <option>In Transit</option>
+      <option>Out for Delivery</option>
+      <option>Delivered</option>
+    </select>
+
+    <button onclick="saveParcel()">Save Parcel</button>
+
+    <div id="saveResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>About Sweta Courier</h2>
+    <p>Reliable parcel delivery and easy shipment tracking.</p>
+    <small>© 2026 SWETA COURIER</small>
+  </div>
+
 </div>
 
-<div class="card">
-<h2>Update Shipment (Owner)</h2>
-<small>This demo stores data only in this browser.</small>
-<input id="awb" placeholder="AWB Number">
-<input id="sender" placeholder="Sender name">
-<input id="receiver" placeholder="Receiver name">
-<input id="from" placeholder="From">
-<input id="to" placeholder="To">
-<select id="status">
-<option>Booked</option><option>In Transit</option><option>Out for Delivery</option><option>Delivered</option>
-</select>
-<button onclick="saveParcel()">Save / Update</button>
-<div id="msg"></div>
-</div>
-</div>
 <script>
 const key="sweta_parcels";
-function data(){return JSON.parse(localStorage.getItem(key)||"{}")}
-function saveParcel(){
- let d=data(), a=document.getElementById("awb").value.trim().toUpperCase();
- if(!a){msg("Enter an AWB number");return}
- d[a]={awb:a,sender:sender.value,receiver:receiver.value,from:from.value,to:to.value,status:status.value,updated:new Date().toLocaleString()};
- localStorage.setItem(key,JSON.stringify(d)); msg("Saved: "+a);
+
+function data(){
+  return JSON.parse(localStorage.getItem(key)||"{}");
 }
-function msg(t){document.getElementById("msg").textContent=t}
-function trackParcel(){
- let a=document.getElementById("track").value.trim().toUpperCase(), p=data()[a], o=document.getElementById("out");
- if(!p){o.innerHTML="<div class='result'>No shipment found for <b>"+a+"</b>.</div>";return}
- let all=["Booked","In Transit","Out for Delivery","Delivered"],i=all.indexOf(p.status);
- o.innerHTML="<div class='result'><b>AWB:</b> "+p.awb+"<br><b>From:</b> "+(p.from||"-")+" → <b>To:</b> "+(p.to||"-")+"<br><b>Receiver:</b> "+(p.receiver||"-")+"<br><b>Status:</b> "+p.status+"<br><small>Last updated: "+p.updated+"</small><div class='steps'>"+all.map((x,j)=>"<span class='step "+(j<=i?"active":"")+"'>"+x
+
+function saveParcel(){
+  let a=document.getElementById("awb").value.trim();
+  let sender=document.getElementById("sender").value.trim();
+  let receiver=document.getElementById("receiver").value.trim();
+  let status=document.getElementById("status").value;
+
+  if(!a){
+    msg("Enter an AWB number");
+    return;
+  }
+
+  let d=data();
+
+  d[a]={
+    awb:a,
+    sender:sender,
+    receiver:receiver,
+    status:status,
+    updated:new Date().toLocaleString()
+  };
+
+  localStorage.setItem(key,JSON.stringify(d));
+
+  document.getElementById("saveResult").inner
