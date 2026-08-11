@@ -1,4 +1,5 @@
-<!doctype html>
+
+  <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -7,80 +8,116 @@
 
 <style>
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:Arial,sans-serif;
   background:#f3f6f9;
   color:#17202a;
 }
+
 header{
   background:#123b56;
   color:white;
   padding:28px 18px;
   text-align:center;
 }
-h1{margin:0;font-size:26px}
-.tag{color:#8bd3ff}
+
+h1{
+  margin:0;
+  font-size:28px;
+}
+
+.tag{
+  display:inline-block;
+  margin-top:8px;
+  padding:6px 12px;
+  border-radius:20px;
+  background:#2b9b63;
+  font-size:13px;
+}
+
 .wrap{
   max-width:720px;
   margin:28px auto;
-  padding:0 15px;
+  padding:0 16px;
 }
+
 .card{
   background:white;
   border-radius:16px;
-  padding:20px;
-  margin-bottom:18px;
+  padding:22px;
+  margin-bottom:20px;
   box-shadow:0 5px 20px rgba(0,0,0,.08);
 }
+
+h2{
+  margin-top:0;
+  color:#123b56;
+}
+
 label{
   display:block;
-  font-weight:bold;
   margin:12px 0 6px;
+  font-weight:bold;
 }
+
 input,select,button{
   width:100%;
+  box-sizing:border-box;
   padding:13px;
-  border-radius:10px;
   border:1px solid #ccd5dc;
-  font-size:16px;
+  border-radius:9px;
+  font-size:15px;
 }
+
 button{
+  margin-top:15px;
   background:#123b56;
   color:white;
   border:0;
   font-weight:bold;
-  margin-top:16px;
+  cursor:pointer;
 }
-button:active{transform:scale(.98)}
+
+button:hover{
+  opacity:.92;
+}
+
 .result{
   border-left:5px solid #2b9b63;
-  padding:14px;
-  background:#f7faf8;
+  padding:15px;
   margin-top:18px;
+  background:#f5faf7;
   border-radius:8px;
 }
+
 .steps{
   display:flex;
   gap:6px;
-  margin-top:14px;
-  flex-wrap:wrap;
+  margin-top:15px;
 }
+
 .step{
-  padding:8px 10px;
-  border-radius:20px;
-  background:#e7edf2;
-  font-size:13px;
+  flex:1;
+  height:8px;
+  background:#d8dee3;
+  border-radius:10px;
 }
-.active{
+
+.step.active{
   background:#2b9b63;
-  color:white;
 }
-small{color:#667}
-hr{
-  border:0;
-  border-top:1px solid #ddd;
-  margin:20px 0;
+
+small{
+  color:#667;
+}
+
+footer{
+  text-align:center;
+  padding:25px;
+  color:#667;
+  font-size:13px;
 }
 </style>
 </head>
@@ -89,7 +126,7 @@ hr{
 
 <header>
   <h1>SWETA <span class="tag">COURIER</span></h1>
-  <div>Fast • Safe • Reliable</div>
+  <p>Fast • Safe • Reliable</p>
 </header>
 
 <div class="wrap">
@@ -97,19 +134,19 @@ hr{
   <div class="card">
     <h2>Track Your Parcel</h2>
 
-    <label>AWB / Tracking Number</label>
-    <input id="track" placeholder="Enter AWB number">
+    <label for="awb">AWB / Tracking Number</label>
+    <input id="awb" type="text" placeholder="Enter tracking number">
 
     <button onclick="trackParcel()">Track Parcel</button>
 
-    <div id="trackResult"></div>
+    <div id="trackingResult"></div>
   </div>
 
   <div class="card">
     <h2>Book a Parcel</h2>
 
     <label>AWB Number</label>
-    <input id="awb" placeholder="Enter AWB number">
+    <input id="bookAwb" placeholder="Example: SC10001">
 
     <label>Sender Name</label>
     <input id="sender" placeholder="Sender name">
@@ -117,12 +154,13 @@ hr{
     <label>Receiver Name</label>
     <input id="receiver" placeholder="Receiver name">
 
-    <label>Current Status</label>
+    <label>Status</label>
     <select id="status">
-      <option>Booked</option>
-      <option>In Transit</option>
-      <option>Out for Delivery</option>
-      <option>Delivered</option>
+      <option value="Booked">Booked</option>
+      <option value="Picked Up">Picked Up</option>
+      <option value="In Transit">In Transit</option>
+      <option value="Out for Delivery">Out for Delivery</option>
+      <option value="Delivered">Delivered</option>
     </select>
 
     <button onclick="saveParcel()">Save Parcel</button>
@@ -132,40 +170,108 @@ hr{
 
   <div class="card">
     <h2>About Sweta Courier</h2>
-    <p>Reliable parcel delivery and easy shipment tracking.</p>
-    <small>© 2026 SWETA COURIER</small>
+    <p>
+      Sweta Courier provides simple, fast and reliable parcel delivery
+      tracking. Enter your AWB number above to check the latest parcel status.
+    </p>
   </div>
 
 </div>
 
-<script>
-const key="sweta_parcels";
+<footer>
+  © 2026 SWETA COURIER • Fast • Safe • Reliable
+</footer>
 
-function data(){
-  return JSON.parse(localStorage.getItem(key)||"{}");
+<script>
+
+function getParcels(){
+  return JSON.parse(localStorage.getItem("swetaParcels") || "{}");
 }
 
 function saveParcel(){
-  let a=document.getElementById("awb").value.trim();
-  let sender=document.getElementById("sender").value.trim();
-  let receiver=document.getElementById("receiver").value.trim();
-  let status=document.getElementById("status").value;
 
-  if(!a){
-    msg("Enter an AWB number");
+  const awb=document.getElementById("bookAwb").value.trim();
+  const sender=document.getElementById("sender").value.trim();
+  const receiver=document.getElementById("receiver").value.trim();
+  const status=document.getElementById("status").value;
+
+  if(!awb || !sender || !receiver){
+    document.getElementById("saveResult").innerHTML =
+      '<div class="result">Please fill all details.</div>';
     return;
   }
 
-  let d=data();
+  const parcels=getParcels();
 
-  d[a]={
-    awb:a,
+  parcels[awb]={
+    awb:awb,
     sender:sender,
     receiver:receiver,
-    status:status,
-    updated:new Date().toLocaleString()
+    status:status
   };
 
-  localStorage.setItem(key,JSON.stringify(d));
+  localStorage.setItem("swetaParcels",JSON.stringify(parcels));
 
-  document.getElementById("saveResult").inner 
+  document.getElementById("saveResult").innerHTML =
+    '<div class="result"><b>Parcel saved successfully!</b><br>AWB: '+awb+'</div>';
+
+  document.getElementById("bookAwb").value="";
+  document.getElementById("sender").value="";
+  document.getElementById("receiver").value="";
+}
+
+function trackParcel(){
+
+  const awb=document.getElementById("awb").value.trim();
+  const result=document.getElementById("trackingResult");
+
+  if(!awb){
+    result.innerHTML='<div class="result">Please enter an AWB number.</div>';
+    return;
+  }
+
+  const parcels=getParcels();
+  const parcel=parcels[awb];
+
+  if(!parcel){
+    result.innerHTML=
+      '<div class="result"><b>Parcel not found.</b><br>Please check your AWB number.</div>';
+    return;
+  }
+
+  const statuses=[
+    "Booked",
+    "Picked Up",
+    "In Transit",
+    "Out for Delivery",
+    "Delivered"
+  ];
+
+  const current=statuses.indexOf(parcel.status);
+
+  let steps="";
+
+  statuses.forEach((s,i)=>{
+    steps += '<div class="step '+(i<=current?'active':'')+'"></div>';
+  });
+
+  result.innerHTML=`
+    <div class="result">
+      <h3>Parcel Found</h3>
+
+      <p><b>AWB:</b> ${parcel.awb}</p>
+      <p><b>Sender:</b> ${parcel.sender}</p>
+      <p><b>Receiver:</b> ${parcel.receiver}</p>
+      <p><b>Status:</b> ${parcel.status}</p>
+
+      <div class="steps">${steps}</div>
+
+      <small>Tracking updated successfully.</small>
+    </div>
+  `;
+}
+
+</script>
+
+</body>
+</html>
